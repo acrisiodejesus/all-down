@@ -1,5 +1,18 @@
 # All Down — YouTube 4K/8K Downloader
 
+[![Download All Down Portable](https://img.shields.io/badge/Download-All%20Down%20Port%C3%A1til-E50914?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/acrisiodejesus/all-down/releases/latest/download/AllDown-Portable.zip)
+[![GitHub Releases](https://img.shields.io/badge/Todas%20as%20Vers%C3%B5es-Releases-24292e?style=for-the-badge&logo=github)](https://github.com/acrisiodejesus/all-down/releases)
+
+### 📦 Download da Versão Portátil (Pronta para Usar)
+
+> ⬇️ **[Baixar AllDown-Portable.zip (Versão mais recente)](https://github.com/acrisiodejesus/all-down/releases/latest/download/AllDown-Portable.zip)**
+> 
+> - **Nenhuma instalação necessária**: não precisa instalar Python, Node.js ou FFmpeg.
+> - **Tudo incluso**: FFmpeg, gerador de PO Token e interface gráfica já vêm embutidos.
+> - Basta baixar o arquivo `.zip`, extrair em qualquer pasta e dar um duplo clique em **`AllDown.exe`**.
+
+---
+
 All Down é uma aplicação desktop moderna para Windows desenvolvida para realizar downloads de vídeos e áudios do YouTube na resolução máxima disponível (1080p, 2K, 4K Ultra HD e até 8K), contornando as restrições recentes de PO Token (Proof of Origin), n-sig challenges e rate-limiting do YouTube.
 
 ---
@@ -41,7 +54,7 @@ all-down/
 
 ### Opção 1: Versão Portátil (Recomendado para usuários finais)
 
-1. Acesse o diretório `dist/AllDown-Portable/` ou extraia `dist/AllDown-Portable.zip`.
+1. Baixe o pacote pelo link no topo do README ou acesse o diretório local `dist/AllDown-Portable/`.
 2. Dê um duplo clique em `AllDown.exe`.
 
 ### Opção 2: A partir do código-fonte (Desenvolvimento)
