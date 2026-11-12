@@ -334,6 +334,20 @@ class App(ctk.CTk):
         )
         sub_lbl.pack(anchor="w", pady=(2, 0))
 
+        tutorial_btn = ctk.CTkButton(
+            header,
+            text="📖 Como Usar",
+            width=115,
+            height=36,
+            corner_radius=8,
+            fg_color=COLOR_CARD_ALT,
+            hover_color=COLOR_CARD_BORDER,
+            text_color=COLOR_TEXT_PRIMARY,
+            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            command=self.open_tutorial,
+        )
+        tutorial_btn.grid(row=0, column=2, rowspan=2, padx=(10, 0), sticky="e")
+
         main_frame = ctk.CTkScrollableFrame(
             self,
             fg_color="transparent",
@@ -867,6 +881,124 @@ class App(ctk.CTk):
             cookie_file=self.cookie_file,
         )
         save_settings(self.settings)
+
+    def open_tutorial(self) -> None:
+        win = ctk.CTkToplevel(self)
+        win.title("All Down — Como Usar")
+        win.geometry("640x620")
+        win.minsize(580, 520)
+        win.configure(fg_color=COLOR_BG)
+        win.transient(self)
+        win.grab_set()
+
+        top_bar = ctk.CTkFrame(win, fg_color="transparent")
+        top_bar.pack(fill="x", padx=24, pady=(20, 10))
+
+        title_lbl = ctk.CTkLabel(
+            top_bar,
+            text="📖 Guia Rápido de Uso",
+            font=ctk.CTkFont(family="Segoe UI", size=20, weight="bold"),
+            text_color=COLOR_TEXT_PRIMARY,
+        )
+        title_lbl.pack(anchor="w")
+
+        sub_lbl = ctk.CTkLabel(
+            top_bar,
+            text="Aprenda a aproveitar o máximo do All Down em poucos passos simples.",
+            font=ctk.CTkFont(family="Segoe UI", size=12),
+            text_color=COLOR_TEXT_MUTED,
+        )
+        sub_lbl.pack(anchor="w", pady=(2, 0))
+
+        scroll = ctk.CTkScrollableFrame(
+            win,
+            fg_color="transparent",
+            scrollbar_button_color=COLOR_CARD_BORDER,
+            scrollbar_button_hover_color=COLOR_ACCENT,
+        )
+        scroll.pack(fill="both", expand=True, padx=20, pady=(0, 10))
+
+        steps = [
+            (
+                "🔑 1. Conectar sua Conta do YouTube (Anti-Bloqueio)",
+                "O YouTube impõe restrições contra robôs (erro HTTP 403 Forbidden) e bloqueia streams 4K/8K para quem não está logado.\n\n"
+                "• Clique no botão '🔑 Fazer Login no YouTube' e entre com sua conta na janela oficial do Google.\n"
+                "• Ao concluir, o badge verde '✔ Conta Conectada' confirma que você tem acesso total e velocidade máxima.",
+                "#10B981",
+            ),
+            (
+                "📋 2. Colar o Link do Vídeo ou Playlist",
+                "Copie a URL de qualquer vídeo ou playlist do YouTube (ex: https://www.youtube.com/watch?v=... ou https://www.youtube.com/playlist?list=...).\n\n"
+                "• No All Down, clique no botão '📋 Colar' ou use o atalho Ctrl + V.\n"
+                "• Se colar um vídeo que pertence a uma playlist, o app perguntará se você quer baixar a playlist inteira ou só aquele vídeo.",
+                "#3B82F6",
+            ),
+            (
+                "🔍 3. Analisar o Conteúdo",
+                "Clique em 'Analisar Vídeo' (ou pressione Enter no campo de link).\n\n"
+                "• O app consulta o YouTube e exibe thumbnail, título, canal, duração e todas as resoluções reais disponíveis.",
+                "#8B5CF6",
+            ),
+            (
+                "⚙️ 4. Escolher o Formato e a Qualidade",
+                "Você escolhe exatamente como quer salvar:\n\n"
+                "• MP4: Vídeo com máxima compatibilidade com TVs, celulares e editores.\n"
+                "• MKV: Vídeo preservando codecs originais de alta definição.\n"
+                "• MP3: Baixa somente o áudio convertido em MP3 (bitrate de até 320 kbps de altíssima fidelidade) com tags e metadados inclusos.\n"
+                "• Escolha a resolução desejada (ex: 4K Ultra HD, 1080p Full HD) ou a taxa de bits do áudio.",
+                "#F59E0B",
+            ),
+            (
+                "📁 5. Playlists Organizadas Automaticamente",
+                "Ao baixar uma playlist completa, o All Down cria automaticamente uma subpasta com o nome da playlist dentro da sua pasta de destino.\n\n"
+                "• Todos os arquivos são numerados sequencialmente (ex: '01 - Nome [1080p].mp4' ou '01 - Faixa.mp3').\n"
+                "• Vídeos indisponíveis ou privados são pulados automaticamente sem travar a lista.",
+                "#EC4899",
+            ),
+            (
+                "⬇️ 6. Baixar e Abrir Pasta",
+                "Clique no botão vermelho '⬇ BAIXAR VÍDEO' (ou '⬇ BAIXAR PLAYLIST' / '⬇ BAIXAR ÁUDIO (MP3)').\n\n"
+                "• Acompanhe em tempo real o progresso percentual, velocidade de download e tempo restante.\n"
+                "• Ao finalizar, clique em '📂 Abrir Pasta' para ir direto até os arquivos prontos!",
+                COLOR_ACCENT,
+            ),
+        ]
+
+        for title, desc, color in steps:
+            card = ctk.CTkFrame(scroll, fg_color=COLOR_CARD, border_color=COLOR_CARD_BORDER, border_width=1, corner_radius=10)
+            card.pack(fill="x", pady=6, padx=4)
+
+            header_step = ctk.CTkFrame(card, fg_color="transparent")
+            header_step.pack(fill="x", padx=16, pady=(12, 6))
+
+            ctk.CTkLabel(
+                header_step,
+                text=title,
+                font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
+                text_color=color,
+            ).pack(side="left")
+
+            ctk.CTkLabel(
+                card,
+                text=desc,
+                font=ctk.CTkFont(family="Segoe UI", size=12),
+                text_color=COLOR_TEXT_PRIMARY,
+                wraplength=520,
+                justify="left",
+                anchor="w",
+            ).pack(fill="x", padx=16, pady=(0, 14))
+
+        close_btn = ctk.CTkButton(
+            win,
+            text="Entendi, Fechar Guia",
+            height=42,
+            corner_radius=8,
+            fg_color=COLOR_ACCENT,
+            hover_color=COLOR_ACCENT_HOVER,
+            font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
+            command=win.destroy,
+        )
+        close_btn.pack(fill="x", padx=24, pady=16)
 
     def open_embedded_login(self) -> None:
         self.login_btn.configure(state="disabled")
