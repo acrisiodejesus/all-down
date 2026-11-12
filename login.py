@@ -7,8 +7,14 @@ from email.utils import parsedate_to_datetime
 from pathlib import Path
 import webview
 
+def get_base_dir() -> Path:
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).parent
+    return Path(__file__).parent
+
+
 LOGIN_URL = "https://accounts.google.com/ServiceLogin?service=youtube&continue=https%3A%2F%2Fwww.youtube.com"
-COOKIE_TARGET = Path(__file__).parent / "cookies.txt"
+COOKIE_TARGET = get_base_dir() / "cookies.txt"
 STORAGE_DIR = Path.home() / ".alldown_webview"
 
 AUTH_COOKIE_KEYS = {

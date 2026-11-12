@@ -203,6 +203,20 @@ def open_in_explorer(path: str) -> None:
         subprocess.run(["xdg-open", os.path.dirname(path) if os.path.isfile(path) else path])
 
 
+def check_cookie_auth(path: Path | str | None) -> bool:
+    if not path:
+        return False
+    p = Path(path)
+    if not p.is_file():
+        return False
+    try:
+        content = p.read_text(encoding="utf-8", errors="ignore")
+        auth_markers = ("LOGIN_INFO", "SAPISID", "SID", "SSID", "HSID", "__Secure-1PSID", "__Secure-3PSID")
+        return any(marker in content for marker in auth_markers)
+    except Exception:
+        return False
+
+
 class App(ctk.CTk):
     def __init__(self) -> None:
         super().__init__()
@@ -244,7 +258,13 @@ class App(ctk.CTk):
             self.cookie_file = str(default_cookie_file)
             self.settings["cookie_file"] = self.cookie_file
 
-        self.cookies_var = ctk.StringVar(value=self.settings.get("cookies", COOKIE_FILE if default_cookie_file.is_file() else NO_COOKIES))
+        saved_cookies = self.settings.get("cookies")
+        if not saved_cookies:
+            if check_cookie_auth(self.cookie_file) or check_cookie_auth(default_cookie_file):
+                saved_cookies = COOKIE_FILE
+            else:
+                saved_cookies = NO_COOKIES
+        self.cookies_var = ctk.StringVar(value=saved_cookies)
 
         self.status_var = ctk.StringVar(value="Cole o link de um vídeo do YouTube e clique em Analisar.")
         self.progress_detail_var = ctk.StringVar(value="")
@@ -254,6 +274,7 @@ class App(ctk.CTk):
         self._set_state()
         self._update_auth_ui()
         self.after(100, self._poll_events)
+        self.after(600, self._check_login_on_startup)
 
     def _build_ui(self, icon_png: Path) -> None:
         self.grid_columnconfigure(0, weight=1)
@@ -636,26 +657,72 @@ class App(ctk.CTk):
         except Exception:
             pass
 
-    def _update_auth_ui(self) -> None:
-        default_cookie = self.base_dir / "cookies.txt"
-        has_file = (self.cookie_file and os.path.isfile(self.cookie_file)) or default_cookie.is_file()
-        if self.cookies_var.get() == COOKIE_FILE and has_file:
-            self.auth_badge.configure(
-                text="  ✔ Conta Conectada  ",
-                fg_color=COLOR_SUCCESS,
-                text_color="#FFFFFF",
+    def is_logged_in(self) -> bool:
+        if self.cookies_var.get() in BROWSERS:
+            return True
+        if self.cookies_var.get() == NO_COOKIES:
+            return False
+        target = self.cookie_file if (self.cookie_file and os.path.isfile(self.cookie_file)) else (self.base_dir / "cookies.txt")
+        return check_cookie_auth(target)
+
+    def _check_login_on_startup(self) -> None:
+        if not self.is_logged_in():
+            ans = messagebox.askyesno(
+                APP_NAME,
+                "Você ainda não conectou sua conta do YouTube.\n\n"
+                "Fazer login evita o erro 403 (Forbidden), bloqueios anti-robô e permite baixar em 4K e resoluções máximas.\n\n"
+                "Deseja fazer login na sua conta do YouTube agora?",
             )
-        elif self.cookies_var.get() in BROWSERS:
-            self.auth_badge.configure(
-                text=f"  Navegador {self.cookies_var.get()}  ",
-                fg_color="#3B82F6",
-                text_color="#FFFFFF",
+            if ans:
+                self.open_embedded_login()
+
+    def prompt_login_if_not_logged(self, action_desc: str = "esta ação") -> bool:
+        if self.is_logged_in():
+            return True
+        resp = messagebox.askyesnocancel(
+            APP_NAME,
+            f"Você ainda não fez login no YouTube.\n\n"
+            f"Para {action_desc} com segurança (evitando bloqueios de robô e erro 403), é recomendado conectar sua conta.\n\n"
+            f"• Sim: Fazer login agora no YouTube\n"
+            f"• Não: Continuar sem login\n"
+            f"• Cancelar: Voltar",
+        )
+        if resp is True:
+            self.open_embedded_login()
+            return False
+        elif resp is False:
+            return True
+        return False
+
+    def _update_auth_ui(self) -> None:
+        if self.is_logged_in():
+            if self.cookies_var.get() in BROWSERS:
+                self.auth_badge.configure(
+                    text=f"  ✔ Navegador {self.cookies_var.get()}  ",
+                    fg_color=COLOR_SUCCESS,
+                    text_color="#FFFFFF",
+                )
+            else:
+                self.auth_badge.configure(
+                    text="  ✔ Conta Conectada  ",
+                    fg_color=COLOR_SUCCESS,
+                    text_color="#FFFFFF",
+                )
+            self.login_btn.configure(
+                text="🔄 Trocar Conta",
+                fg_color=COLOR_CARD_ALT,
+                hover_color=COLOR_CARD_BORDER,
             )
         else:
             self.auth_badge.configure(
-                text="  Modo Anônimo  ",
-                fg_color=COLOR_CARD_ALT,
-                text_color=COLOR_TEXT_MUTED,
+                text="  ⚠ Não Conectado (Exigido p/ 4K)  ",
+                fg_color=COLOR_WARNING,
+                text_color="#000000",
+            )
+            self.login_btn.configure(
+                text="🔑 Fazer Login no YouTube",
+                fg_color="#2563EB",
+                hover_color="#1D4ED8",
             )
 
     def _set_state(self) -> None:
@@ -689,6 +756,8 @@ class App(ctk.CTk):
         url = self.url_var.get().strip()
         if not url or self.busy:
             return
+        if not self.prompt_login_if_not_logged("analisar este vídeo"):
+            return
         self.info = None
         self.card_info.pack_forget()
         self.quality_menu.configure(values=[BEST])
@@ -705,6 +774,8 @@ class App(ctk.CTk):
         folder = self.folder_var.get()
         if not os.path.isdir(folder):
             messagebox.showerror(APP_NAME, "A pasta de destino não existe.")
+            return
+        if not self.prompt_login_if_not_logged("baixar em alta qualidade"):
             return
         self._persist()
         self.progress.stop()
@@ -792,9 +863,11 @@ class App(ctk.CTk):
         browser = BROWSERS.get(self.cookies_var.get())
         if browser:
             opts["cookiesfrombrowser"] = (browser,)
-        elif self.cookie_file and os.path.isfile(self.cookie_file):
-            opts["cookiefile"] = self.cookie_file
-        else:
+        elif self.cookies_var.get() == COOKIE_FILE:
+            target = self.cookie_file if (self.cookie_file and os.path.isfile(self.cookie_file)) else str(self.base_dir / "cookies.txt")
+            if os.path.isfile(target):
+                opts["cookiefile"] = target
+        elif self.cookies_var.get() != NO_COOKIES:
             default_cookie = self.base_dir / "cookies.txt"
             if default_cookie.is_file():
                 opts["cookiefile"] = str(default_cookie)

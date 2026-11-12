@@ -1,5 +1,6 @@
 import os
 import shutil
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -7,6 +8,24 @@ from pathlib import Path
 BASE_DIR = Path(__file__).parent
 DIST_DIR = BASE_DIR / "dist"
 PORTABLE_DIR = DIST_DIR / "AllDown-Portable"
+
+
+def remove_readonly(func, path, _excinfo):
+    try:
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
+    except Exception:
+        pass
+
+
+def safe_rmtree(path: Path) -> None:
+    if not path.exists():
+        return
+    try:
+        shutil.rmtree(path, onexc=remove_readonly)
+    except TypeError:
+        shutil.rmtree(path, onerror=remove_readonly)
+
 
 print("=" * 60)
 print("Construindo All Down Executável Portátil...")
@@ -44,9 +63,7 @@ if not build_output.exists():
     print(f"ERRO: Pasta de saída {build_output} não encontrada!")
     sys.exit(1)
 
-if PORTABLE_DIR.exists():
-    shutil.rmtree(PORTABLE_DIR)
-
+safe_rmtree(PORTABLE_DIR)
 shutil.move(str(build_output), str(PORTABLE_DIR))
 
 bin_dest = PORTABLE_DIR / "bin"
@@ -58,7 +75,12 @@ if (BASE_DIR / "bin" / "node.exe").is_file():
 
 bgutil_dest = PORTABLE_DIR / "bgutil_provider"
 if (BASE_DIR / "bgutil_provider").is_dir():
-    shutil.copytree(BASE_DIR / "bgutil_provider", bgutil_dest, dirs_exist_ok=True)
+    shutil.copytree(
+        BASE_DIR / "bgutil_provider",
+        bgutil_dest,
+        dirs_exist_ok=True,
+        ignore=shutil.ignore_patterns(".git", ".github", "*.pyc"),
+    )
 
 assets_dest = PORTABLE_DIR / "assets"
 shutil.copytree(BASE_DIR / "assets", assets_dest, dirs_exist_ok=True)
