@@ -29,6 +29,39 @@ All Down é uma aplicação desktop moderna para Windows desenvolvida para reali
 
 ---
 
+## 📖 Mini Tutorial de Uso
+
+### 1. Abrir o Aplicativo
+Dê um duplo clique no executável **`AllDown.exe`** (na versão portátil) ou execute **`run.bat`** (no ambiente de desenvolvimento).
+
+### 2. Conectar sua Conta do YouTube *(Recomendado)*
+- Na primeira inicialização, o aplicativo verifica se você já fez login. Caso não esteja conectado, ele perguntará se deseja conectar agora.
+- Clique em **Sim** ou no botão **`🔑 Fazer Login no YouTube`**.
+- Uma janela segura oficial do Google será aberta. Entre com sua conta.
+- Assim que o login for concluído, a janela se fechará automaticamente e o badge mudará para **`✔ Conta Conectada`**.
+> *Dica: Fazer login impede bloqueios de robô do YouTube (HTTP 403 Forbidden) e garante o download em 4K/8K com taxa máxima de transferência.*
+
+### 3. Colar o Link do Vídeo
+- Copie o link do vídeo do YouTube que deseja baixar.
+- No All Down, clique no botão **`📋 Colar`** ou pressione `Ctrl + V` no campo de texto.
+
+### 4. Analisar o Vídeo
+- Clique em **`Analisar Vídeo`** ou pressione `Enter`.
+- O aplicativo consultará o YouTube e exibirá a miniatura (thumbnail), título, canal, duração e o selo de resolução máxima disponível.
+
+### 5. Escolher a Qualidade e Formato
+- **Qualidade Desejada**: Escolha no menu a resolução desejada (ex: `2160p (4K Ultra HD)`, `1080p (Full HD)` ou `Melhor disponível`).
+- **Formato Final**: Escolha entre **MP4** (compatível com todos os players, TVs e celulares) ou **MKV**.
+- **Salvar na Pasta**: O padrão é a sua pasta *Downloads*. Se quiser mudar, clique em **`📁 Escolher Pasta`**.
+
+### 6. Iniciar o Download
+- Clique no botão vermelho **`⬇ BAIXAR VÍDEO`**.
+- Acompanhe em tempo real o progresso percentual, a velocidade de download e o tempo estimado.
+- O FFmpeg embutido unirá o vídeo em alta resolução com o áudio com qualidade original.
+- Ao terminar, clique em **`📂 Abrir Pasta`** para abrir o explorador de arquivos exatamente onde o vídeo foi salvo!
+
+---
+
 ## Estrutura do Projeto
 
 ```text
