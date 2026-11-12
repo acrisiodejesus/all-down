@@ -20,9 +20,10 @@ All Down é uma aplicação desktop moderna para Windows desenvolvida para reali
 ## Recursos
 
 - **Resoluções Ultra HD**: Download e detecção automática de resoluções de 360p até 4K (2160p) e 8K (4320p).
+- **Download de Playlists Completas**: Baixe playlists inteiras de vídeos ou áudios em lote com um clique, organizadas automaticamente em pastas próprias com numeração sequencial.
 - **Download de Áudio em MP3**: Opção para extrair e baixar exclusivamente o áudio em MP3 com taxa de bits configurável (até 320 kbps de máxima fidelidade) e metadados embutidos.
 - **Interface Moderna Windows 11**: Interface gráfica moderna com CustomTkinter em modo Dark, cantos arredondados e layout em cartões.
-- **Prévia do Vídeo**: Exibição da thumbnail original, título, canal, duração e badge indicativo de 4K Ultra HD.
+- **Prévia do Vídeo / Playlist**: Exibição da thumbnail, título, canal, duração ou quantidade total de faixas/vídeos.
 - **Muxing via FFmpeg**: Mesclagem de streams separados de vídeo de alta resolução e áudio em contêineres MP4 ou MKV.
 - **Autenticação Anti-Robô Integrada**: Janela de login nativa do Google/YouTube via WebView2 (Edge Chromium) para exportação segura de sessão (`cookies.txt`), sem necessidade de instalar extensões no navegador.
 - **Bypass de PO Token (bgutil)**: Integração com gerador dinâmico de GVS PO Tokens em segundo plano via Node.js runtime.
@@ -42,28 +43,30 @@ Dê um duplo clique no executável **`AllDown.exe`** (na versão portátil) ou e
 - Assim que o login for concluído, a janela se fechará automaticamente e o badge mudará para **`✔ Conta Conectada`**.
 > *Dica: Fazer login impede bloqueios de robô do YouTube (HTTP 403 Forbidden) e garante o download em 4K/8K com taxa máxima de transferência.*
 
-### 3. Colar o Link do Vídeo
-- Copie o link do vídeo do YouTube que deseja baixar.
+### 3. Colar o Link do Vídeo ou Playlist
+- Copie o link do vídeo ou da playlist do YouTube (ex: `https://www.youtube.com/playlist?list=...` ou `https://www.youtube.com/watch?v=...`).
 - No All Down, clique no botão **`📋 Colar`** ou pressione `Ctrl + V` no campo de texto.
+- Caso cole o link de um vídeo que faça parte de uma playlist, o app perguntará se você prefere baixar a **playlist inteira** ou **apenas o vídeo individual**.
 
-### 4. Analisar o Vídeo
+### 4. Analisar o Vídeo ou Playlist
 - Clique em **`Analisar Vídeo`** ou pressione `Enter`.
-- O aplicativo consultará o YouTube e exibirá a miniatura (thumbnail), título, canal, duração e o selo de resolução máxima disponível.
+- O aplicativo identificará o conteúdo e exibirá a miniatura, título, canal e o total de vídeos disponíveis.
 
 ### 5. Escolher a Qualidade e Formato
 - **Formato Final**: Escolha entre:
   - **MP4**: Vídeo com máxima compatibilidade (TVs, smartphones, editores).
   - **MKV**: Vídeo preservando codecs originais de altíssima definição.
-  - **MP3**: Baixa **somente o áudio** do vídeo convertido em MP3.
+  - **MP3**: Baixa **somente o áudio** convertido em MP3.
 - **Qualidade Desejada**:
-  - Para vídeo: resoluções disponíveis (ex: `2160p (4K Ultra HD)`, `1080p (Full HD)` ou `Melhor disponível`).
-  - Para áudio MP3: taxa de bits (ex: `320 kbps (Máxima Fidelidade)`, `256 kbps`, `192 kbps` ou `128 kbps`).
-- **Salvar na Pasta**: O padrão é a sua pasta *Downloads*. Se quiser mudar, clique em **`📁 Escolher Pasta`**.
+  - Para vídeos/playlists: resoluções alvo (ex: `Melhor disponível`, `4K Ultra HD`, `1080p Full HD`, `720p HD`).
+  - Para MP3: taxa de bits (ex: `320 kbps (Máxima Fidelidade)`, `256 kbps`, `192 kbps` ou `128 kbps`).
+- **Salvar na Pasta**: O padrão é a sua pasta *Downloads*.
+  > *Ao baixar uma playlist, o aplicativo cria automaticamente uma subpasta com o nome da playlist e numera os arquivos (`01 - ...`, `02 - ...`), mantendo seus arquivos perfeitamente organizados.*
 
 ### 6. Iniciar o Download
-- Clique no botão **`⬇ BAIXAR VÍDEO`** (ou **`⬇ BAIXAR ÁUDIO (MP3)`**).
-- Acompanhe em tempo real o progresso percentual, a velocidade de download e o tempo estimado.
-- Ao terminar, clique em **`📂 Abrir Pasta`** para abrir o explorador de arquivos exatamente onde o arquivo foi salvo!
+- Clique no botão vermelho de download (ex: **`⬇ BAIXAR PLAYLIST COMPLETA`** ou **`⬇ BAIXAR VÍDEO`**).
+- Acompanhe em tempo real o progresso de cada item (ex: `[1/25] Baixando...`), velocidade e tempo estimado.
+- Ao terminar, clique em **`📂 Abrir Pasta`** para abrir o explorador de arquivos diretamente na pasta dos arquivos baixados!
 
 ---
 
