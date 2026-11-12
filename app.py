@@ -44,6 +44,12 @@ BEST = "Melhor disponível"
 NO_COOKIES = "Não usar"
 COOKIE_FILE = "Arquivo cookies.txt…"
 BROWSERS = {"Chrome": "chrome", "Edge": "edge", "Firefox": "firefox", "Brave": "brave", "Opera": "opera"}
+AUDIO_QUALITY_MAP = {
+    "320 kbps (Máxima Fidelidade)": "320",
+    "256 kbps (Muito Alta)": "256",
+    "192 kbps (Alta Qualidade)": "192",
+    "128 kbps (Padrão)": "128",
+}
 ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
 
 COLOR_BG = "#0D0D11"
@@ -273,6 +279,7 @@ class App(ctk.CTk):
         self._build_ui(icon_png)
         self._set_state()
         self._update_auth_ui()
+        self._on_format_changed(self.container_var.get())
         self.after(100, self._poll_events)
         self.after(600, self._check_login_on_startup)
 
@@ -427,13 +434,13 @@ class App(ctk.CTk):
         card_settings.pack(fill="x", pady=8, padx=4)
         card_settings.grid_columnconfigure((0, 1), weight=1)
 
-        q_label = ctk.CTkLabel(
+        self.q_label = ctk.CTkLabel(
             card_settings,
             text="Qualidade Desejada:",
             font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
             text_color=COLOR_TEXT_PRIMARY,
         )
-        q_label.grid(row=0, column=0, padx=18, pady=(14, 6), sticky="w")
+        self.q_label.grid(row=0, column=0, padx=18, pady=(14, 6), sticky="w")
 
         self.quality_menu = ctk.CTkOptionMenu(
             card_settings,
@@ -461,7 +468,7 @@ class App(ctk.CTk):
         self.format_menu = ctk.CTkSegmentedButton(
             card_settings,
             variable=self.container_var,
-            values=["MP4", "MKV"],
+            values=["MP4", "MKV", "MP3"],
             height=38,
             corner_radius=8,
             selected_color=COLOR_ACCENT,
@@ -469,6 +476,7 @@ class App(ctk.CTk):
             unselected_color=COLOR_CARD_ALT,
             unselected_hover_color=COLOR_CARD_BORDER,
             font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            command=self._on_format_changed,
         )
         self.format_menu.grid(row=1, column=1, padx=(12, 18), pady=(0, 16), sticky="ew")
 
@@ -725,6 +733,23 @@ class App(ctk.CTk):
                 hover_color="#1D4ED8",
             )
 
+    def _on_format_changed(self, value: str | None = None) -> None:
+        val = (value or self.container_var.get()).upper()
+        if val == "MP3":
+            self.q_label.configure(text="Qualidade do Áudio (Bitrate):")
+            self.quality_menu.configure(values=list(AUDIO_QUALITY_MAP.keys()))
+            if self.quality_var.get() not in AUDIO_QUALITY_MAP:
+                self.quality_var.set(list(AUDIO_QUALITY_MAP.keys())[0])
+            self.download_btn.configure(text="⬇ BAIXAR ÁUDIO (MP3)")
+        else:
+            self.q_label.configure(text="Qualidade Desejada:")
+            values = list(self.quality_map.keys()) if self.quality_map else [BEST]
+            self.quality_menu.configure(values=values)
+            if self.quality_var.get() not in values:
+                self.quality_var.set(values[1] if len(values) > 1 else BEST)
+            self.download_btn.configure(text="⬇ BAIXAR VÍDEO")
+        self._persist()
+
     def _set_state(self) -> None:
         busy = self.busy
         self.analyze_btn.configure(state="disabled" if busy else "normal")
@@ -732,6 +757,10 @@ class App(ctk.CTk):
         self.folder_btn.configure(state="disabled" if busy else "normal")
         can_download = not busy and self.info is not None
         self.download_btn.configure(state="normal" if can_download else "disabled")
+        if self.container_var.get().upper() == "MP3":
+            self.download_btn.configure(text="⬇ BAIXAR ÁUDIO (MP3)")
+        else:
+            self.download_btn.configure(text="⬇ BAIXAR VÍDEO")
         self.quality_menu.configure(state="normal" if can_download else "disabled")
         self.format_menu.configure(state="normal" if not busy else "disabled")
         self.cookies_box.configure(state="normal" if not busy else "disabled")
@@ -775,16 +804,25 @@ class App(ctk.CTk):
         if not os.path.isdir(folder):
             messagebox.showerror(APP_NAME, "A pasta de destino não existe.")
             return
-        if not self.prompt_login_if_not_logged("baixar em alta qualidade"):
+        is_audio = self.container_var.get().upper() == "MP3"
+        action_desc = "baixar o áudio em MP3" if is_audio else "baixar em alta qualidade"
+        if not self.prompt_login_if_not_logged(action_desc):
             return
         self._persist()
         self.progress.stop()
         self.progress.configure(mode="determinate")
         self.progress.set(0)
-        height = self.quality_map.get(self.quality_var.get())
-        self.status_var.set("Iniciando download em alta qualidade…")
-        self.progress_detail_var.set("0%")
-        self._run_worker(self._download_worker, self.info["webpage_url"], height, self.container_var.get().lower(), folder)
+        container = self.container_var.get().lower()
+        if is_audio:
+            bitrate = AUDIO_QUALITY_MAP.get(self.quality_var.get(), "320")
+            self.status_var.set(f"Iniciando download do áudio em MP3 ({bitrate} kbps)…")
+            self.progress_detail_var.set("0%")
+            self._run_worker(self._download_worker, self.info["webpage_url"], None, "mp3", folder, bitrate)
+        else:
+            height = self.quality_map.get(self.quality_var.get())
+            self.status_var.set("Iniciando download em alta qualidade…")
+            self.progress_detail_var.set("0%")
+            self._run_worker(self._download_worker, self.info["webpage_url"], height, container, folder, "320")
 
     def _persist(self) -> None:
         self.settings.update(
@@ -897,31 +935,59 @@ class App(ctk.CTk):
         except Exception as exc:
             self.events.put(("error", clean_error(exc)))
 
-    def _download_worker(self, url: str, height: int | None, container: str, folder: str) -> None:
-        if height is None:
-            fmt = "bv*+ba/b"
-        elif container == "mp4":
-            fmt = (
-                f"bv*[height={height}]+ba[ext=m4a]/bv*[height={height}]+ba/b[height={height}]"
-                f"/bv*[height<={height}]+ba/b"
-            )
+    def _download_worker(self, url: str, height: int | None, container: str, folder: str, bitrate: str = "320") -> None:
+        if container == "mp3":
+            fmt = "ba/b"
+            outtmpl = os.path.join(folder, "%(title)s.%(ext)s")
+            postprocessors = [
+                {
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": "mp3",
+                    "preferredquality": bitrate,
+                },
+                {
+                    "key": "FFmpegMetadata",
+                    "add_metadata": True,
+                },
+            ]
+            opts = self._base_opts() | {
+                "format": fmt,
+                "outtmpl": outtmpl,
+                "postprocessors": postprocessors,
+                "windowsfilenames": True,
+                "concurrent_fragment_downloads": 4,
+                "progress_hooks": [self._progress_hook],
+                "postprocessor_hooks": [self._postprocessor_hook],
+            }
         else:
-            fmt = f"bv*[height={height}]+ba/b[height={height}]/bv*[height<={height}]+ba/b"
+            if height is None:
+                fmt = "bv*+ba/b"
+            elif container == "mp4":
+                fmt = (
+                    f"bv*[height={height}]+ba[ext=m4a]/bv*[height={height}]+ba/b[height={height}]"
+                    f"/bv*[height<={height}]+ba/b"
+                )
+            else:
+                fmt = f"bv*[height={height}]+ba/b[height={height}]/bv*[height<={height}]+ba/b"
 
-        opts = self._base_opts() | {
-            "format": fmt,
-            "merge_output_format": container,
-            "outtmpl": os.path.join(folder, "%(title)s [%(height)sp].%(ext)s"),
-            "windowsfilenames": True,
-            "concurrent_fragment_downloads": 4,
-            "progress_hooks": [self._progress_hook],
-            "postprocessor_hooks": [self._postprocessor_hook],
-        }
+            opts = self._base_opts() | {
+                "format": fmt,
+                "merge_output_format": container,
+                "outtmpl": os.path.join(folder, "%(title)s [%(height)sp].%(ext)s"),
+                "windowsfilenames": True,
+                "concurrent_fragment_downloads": 4,
+                "progress_hooks": [self._progress_hook],
+                "postprocessor_hooks": [self._postprocessor_hook],
+            }
         try:
             with yt_dlp.YoutubeDL(opts) as ydl:
                 info = ydl.extract_info(url, download=True)
             downloads = info.get("requested_downloads") or [{}]
             path = downloads[0].get("filepath") or downloads[0].get("_filename")
+            if container == "mp3" and path:
+                mp3_candidate = os.path.splitext(path)[0] + ".mp3"
+                if os.path.isfile(mp3_candidate):
+                    path = mp3_candidate
             self.events.put(("done", path))
         except DownloadCancelled:
             self.events.put(("cancelled", None))
@@ -949,8 +1015,12 @@ class App(ctk.CTk):
             self.events.put(("progress", (1.0, "100%", f"Download do {kind} concluído com sucesso.")))
 
     def _postprocessor_hook(self, d: dict) -> None:
-        if d["status"] == "started" and d.get("postprocessor") == "Merger":
-            self.events.put(("merging", None))
+        if d["status"] == "started":
+            pp = d.get("postprocessor")
+            if pp == "Merger":
+                self.events.put(("merging", None))
+            elif pp in ("ExtractAudio", "FFmpegExtractAudio"):
+                self.events.put(("converting_audio", None))
 
     def _poll_events(self) -> None:
         try:
@@ -1008,9 +1078,18 @@ class App(ctk.CTk):
                 label += f" {int(round(fps))}fps"
             self.quality_map[label] = h
 
-        values = list(self.quality_map)
-        self.quality_menu.configure(values=values)
-        self.quality_var.set(values[1] if len(values) > 1 else BEST)
+        if self.container_var.get().upper() == "MP3":
+            self.q_label.configure(text="Qualidade do Áudio (Bitrate):")
+            self.quality_menu.configure(values=list(AUDIO_QUALITY_MAP.keys()))
+            if self.quality_var.get() not in AUDIO_QUALITY_MAP:
+                self.quality_var.set(list(AUDIO_QUALITY_MAP.keys())[0])
+            self.download_btn.configure(text="⬇ BAIXAR ÁUDIO (MP3)")
+        else:
+            self.q_label.configure(text="Qualidade Desejada:")
+            values = list(self.quality_map)
+            self.quality_menu.configure(values=values)
+            self.quality_var.set(values[1] if len(values) > 1 else BEST)
+            self.download_btn.configure(text="⬇ BAIXAR VÍDEO")
 
         has_4k = any(h >= 2160 for h in best)
         if has_4k:
@@ -1020,7 +1099,7 @@ class App(ctk.CTk):
             self.video_tier_badge.configure(text=f"  MÁXIMA RESOLUÇÃO: {top_h}p  ", fg_color="#2563EB")
 
         self.card_info.pack(fill="x", pady=8, padx=4, before=self.folder_entry.master)
-        self._finish("Vídeo identificado! Escolha a resolução e clique em Baixar.")
+        self._finish("Vídeo identificado! Escolha o formato e a qualidade para baixar.")
         self.progress.set(0)
         self.progress_detail_var.set("")
 
@@ -1036,6 +1115,12 @@ class App(ctk.CTk):
         self.progress.start()
         self.status_var.set("Juntando áudio e vídeo de alta fidelidade via FFmpeg…")
         self.progress_detail_var.set("Processando...")
+
+    def _on_converting_audio(self, _payload) -> None:
+        self.progress.configure(mode="indeterminate")
+        self.progress.start()
+        self.status_var.set("Extraindo e convertendo áudio para MP3 via FFmpeg…")
+        self.progress_detail_var.set("Convertendo MP3...")
 
     def _on_done(self, path: str | None) -> None:
         self.last_file = path

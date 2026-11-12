@@ -20,6 +20,7 @@ All Down é uma aplicação desktop moderna para Windows desenvolvida para reali
 ## Recursos
 
 - **Resoluções Ultra HD**: Download e detecção automática de resoluções de 360p até 4K (2160p) e 8K (4320p).
+- **Download de Áudio em MP3**: Opção para extrair e baixar exclusivamente o áudio em MP3 com taxa de bits configurável (até 320 kbps de máxima fidelidade) e metadados embutidos.
 - **Interface Moderna Windows 11**: Interface gráfica moderna com CustomTkinter em modo Dark, cantos arredondados e layout em cartões.
 - **Prévia do Vídeo**: Exibição da thumbnail original, título, canal, duração e badge indicativo de 4K Ultra HD.
 - **Muxing via FFmpeg**: Mesclagem de streams separados de vídeo de alta resolução e áudio em contêineres MP4 ou MKV.
@@ -50,15 +51,19 @@ Dê um duplo clique no executável **`AllDown.exe`** (na versão portátil) ou e
 - O aplicativo consultará o YouTube e exibirá a miniatura (thumbnail), título, canal, duração e o selo de resolução máxima disponível.
 
 ### 5. Escolher a Qualidade e Formato
-- **Qualidade Desejada**: Escolha no menu a resolução desejada (ex: `2160p (4K Ultra HD)`, `1080p (Full HD)` ou `Melhor disponível`).
-- **Formato Final**: Escolha entre **MP4** (compatível com todos os players, TVs e celulares) ou **MKV**.
+- **Formato Final**: Escolha entre:
+  - **MP4**: Vídeo com máxima compatibilidade (TVs, smartphones, editores).
+  - **MKV**: Vídeo preservando codecs originais de altíssima definição.
+  - **MP3**: Baixa **somente o áudio** do vídeo convertido em MP3.
+- **Qualidade Desejada**:
+  - Para vídeo: resoluções disponíveis (ex: `2160p (4K Ultra HD)`, `1080p (Full HD)` ou `Melhor disponível`).
+  - Para áudio MP3: taxa de bits (ex: `320 kbps (Máxima Fidelidade)`, `256 kbps`, `192 kbps` ou `128 kbps`).
 - **Salvar na Pasta**: O padrão é a sua pasta *Downloads*. Se quiser mudar, clique em **`📁 Escolher Pasta`**.
 
 ### 6. Iniciar o Download
-- Clique no botão vermelho **`⬇ BAIXAR VÍDEO`**.
+- Clique no botão **`⬇ BAIXAR VÍDEO`** (ou **`⬇ BAIXAR ÁUDIO (MP3)`**).
 - Acompanhe em tempo real o progresso percentual, a velocidade de download e o tempo estimado.
-- O FFmpeg embutido unirá o vídeo em alta resolução com o áudio com qualidade original.
-- Ao terminar, clique em **`📂 Abrir Pasta`** para abrir o explorador de arquivos exatamente onde o vídeo foi salvo!
+- Ao terminar, clique em **`📂 Abrir Pasta`** para abrir o explorador de arquivos exatamente onde o arquivo foi salvo!
 
 ---
 
