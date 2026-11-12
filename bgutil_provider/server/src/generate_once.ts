@@ -1,3 +1,8 @@
+if (process.argv.includes("--version")) {
+    console.log("2.0.2");
+    process.exit(0);
+}
+
 import { SessionManager, YoutubeSessionDataCaches } from "./session_manager.ts";
 import { VERSION } from "./utils.ts";
 import { Command } from "commander";
