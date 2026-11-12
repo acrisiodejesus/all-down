@@ -1,0 +1,6 @@
+yt-dlp[default]
+imageio-ffmpeg
+pywebview
+bgutil-ytdlp-pot-provider
+customtkinter
+pillow

@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.spec
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+
+# Binarios e distribuicao
+dist/
+build/
+bin/
+*.zip
+*.exe
+
+# Dependencias do Node.js
+node_modules/
+bgutil_provider/server/node_modules/
+bgutil_provider/server/build/
+bgutil_provider/server/tsconfig.tsbuildinfo
+
+# Seguranca e dados de sessao (NUNCA comitar)
+cookies.txt
+.alldown.json
+.alldown_webview/
+
+# Arquivos de sistema e IDE
+.idea/
+.vscode/
+Thumbs.db
+Desktop.ini
