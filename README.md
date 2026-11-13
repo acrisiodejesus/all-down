@@ -1,4 +1,4 @@
-# All Down — YouTube 4K/8K Downloader
+# All Down — Downloader Universal 4K/8K (YouTube, Instagram, Facebook & TikTok)
 
 [![Download All Down Portable](https://img.shields.io/badge/Download-All%20Down%20Port%C3%A1til-E50914?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/acrisiodejesus/all-down/releases/latest/download/AllDown-Portable.zip)
 [![GitHub Releases](https://img.shields.io/badge/Todas%20as%20Vers%C3%B5es-Releases-24292e?style=for-the-badge&logo=github)](https://github.com/acrisiodejesus/all-down/releases)
@@ -13,12 +13,13 @@
 
 ---
 
-All Down é uma aplicação desktop moderna para Windows desenvolvida para realizar downloads de vídeos e áudios do YouTube na resolução máxima disponível (1080p, 2K, 4K Ultra HD e até 8K), contornando as restrições recentes de PO Token (Proof of Origin), n-sig challenges e rate-limiting do YouTube.
+All Down é uma aplicação desktop moderna para Windows desenvolvida para realizar downloads de vídeos, reels, playlists e áudios do **YouTube, Instagram, Facebook e TikTok** na resolução máxima disponível (até 4K Ultra HD e 8K no YouTube), contornando as restrições recentes de PO Token (Proof of Origin), n-sig challenges e rate-limiting.
 
 ---
 
 ## Recursos
 
+- **Suporte Multi-Plataforma**: Baixe vídeos, Reels, Shorts, Stories públicos e áudios do **YouTube, Instagram, Facebook e TikTok** com detecção automática de plataforma.
 - **Resoluções Ultra HD**: Download e detecção automática de resoluções de 360p até 4K (2160p) e 8K (4320p).
 - **Download de Playlists Completas**: Baixe playlists inteiras de vídeos ou áudios em lote com um clique, organizadas automaticamente em pastas próprias com numeração sequencial.
 - **Download de Áudio em MP3**: Opção para extrair e baixar exclusivamente o áudio em MP3 com taxa de bits configurável (até 320 kbps de máxima fidelidade) e metadados embutidos.
@@ -36,17 +37,16 @@ All Down é uma aplicação desktop moderna para Windows desenvolvida para reali
 ### 1. Abrir o Aplicativo
 Dê um duplo clique no executável **`AllDown.exe`** (na versão portátil) ou execute **`run.bat`** (no ambiente de desenvolvimento).
 
-### 2. Conectar sua Conta do YouTube *(Recomendado)*
-- Na primeira inicialização, o aplicativo verifica se você já fez login. Caso não esteja conectado, ele perguntará se deseja conectar agora.
-- Clique em **Sim** ou no botão **`🔑 Fazer Login no YouTube`**.
-- Uma janela segura oficial do Google será aberta. Entre com sua conta.
-- Assim que o login for concluído, a janela se fechará automaticamente e o badge mudará para **`✔ Conta Conectada`**.
+### 2. Conectar sua Conta do YouTube *(Para YouTube)*
+- Na primeira inicialização, o aplicativo verifica se você já fez login no YouTube.
+- Para links do **YouTube**, clique em **Sim** ou no botão **`🔑 Fazer Login no YouTube`** e entre com sua conta na janela oficial do Google.
+- Para links do **Instagram, Facebook e TikTok**, o login do YouTube não é exigido — basta colar o link público!
 > *Dica: Fazer login impede bloqueios de robô do YouTube (HTTP 403 Forbidden) e garante o download em 4K/8K com taxa máxima de transferência.*
 
-### 3. Colar o Link do Vídeo ou Playlist
-- Copie o link do vídeo ou da playlist do YouTube (ex: `https://www.youtube.com/playlist?list=...` ou `https://www.youtube.com/watch?v=...`).
+### 3. Colar o Link do Vídeo, Reel ou Playlist
+- Copie o link do YouTube, Instagram (vídeo/Reel), Facebook (vídeo/Reel) ou TikTok.
 - No All Down, clique no botão **`📋 Colar`** ou pressione `Ctrl + V` no campo de texto.
-- Caso cole o link de um vídeo que faça parte de uma playlist, o app perguntará se você prefere baixar a **playlist inteira** ou **apenas o vídeo individual**.
+- Caso cole o link de um vídeo do YouTube que faça parte de uma playlist, o app perguntará se você prefere baixar a **playlist inteira** ou **apenas o vídeo individual**.
 
 ### 4. Analisar o Vídeo ou Playlist
 - Clique em **`Analisar Vídeo`** ou pressione `Enter`.

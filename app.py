@@ -226,11 +226,33 @@ def check_cookie_auth(path: Path | str | None) -> bool:
         return False
 
 
+PLATFORM_INFO = {
+    "youtube": ("YouTube", "📺", "#E50914"),
+    "instagram": ("Instagram", "📸", "#E1306C"),
+    "facebook": ("Facebook", "📘", "#1877F2"),
+    "tiktok": ("TikTok", "🎵", "#0D9488"),
+    "other": ("Web", "🌐", "#2563EB"),
+}
+
+
+def detect_platform(url: str) -> str:
+    lower = url.lower()
+    if "youtube.com" in lower or "youtu.be" in lower:
+        return "youtube"
+    if "instagram.com" in lower or "instagr.am" in lower:
+        return "instagram"
+    if "facebook.com" in lower or "fb.watch" in lower or "fb.com" in lower:
+        return "facebook"
+    if "tiktok.com" in lower:
+        return "tiktok"
+    return "other"
+
+
 class App(ctk.CTk):
     def __init__(self) -> None:
         super().__init__()
         ctk.set_appearance_mode("dark")
-        self.title(f"{APP_NAME} — YouTube 4K Downloader")
+        self.title(f"{APP_NAME} — Downloader Universal 4K")
         self.geometry("820x760")
         self.minsize(780, 700)
         self.configure(fg_color=COLOR_BG)
@@ -335,7 +357,7 @@ class App(ctk.CTk):
 
         sub_lbl = ctk.CTkLabel(
             title_box,
-            text="Baixe vídeos, playlists e áudios do YouTube na resolução máxima sem restrições",
+            text="Baixe vídeos, reels, playlists e áudios do YouTube, Instagram, Facebook e TikTok",
             font=ctk.CTkFont(family="Segoe UI", size=12),
             text_color=COLOR_TEXT_MUTED,
         )
@@ -379,7 +401,7 @@ class App(ctk.CTk):
         self.url_entry = ctk.CTkEntry(
             card_url,
             textvariable=self.url_var,
-            placeholder_text="Cole o link do YouTube aqui (vídeo ou playlist)...",
+            placeholder_text="Cole o link do YouTube, Instagram, Facebook ou TikTok aqui...",
             height=44,
             corner_radius=8,
             border_color=COLOR_CARD_BORDER,
@@ -820,7 +842,8 @@ class App(ctk.CTk):
         url = self.url_var.get().strip()
         if not url or self.busy:
             return
-        if ("watch?" in url or "watch/" in url) and "list=" in url:
+        platform = detect_platform(url)
+        if platform == "youtube" and ("watch?" in url or "watch/" in url) and "list=" in url:
             ans = messagebox.askyesno(
                 APP_NAME,
                 "O link informado contém um vídeo que pertence a uma Playlist.\n\n"
@@ -832,7 +855,7 @@ class App(ctk.CTk):
                 url = re.sub(r"[&?]list=[^&]+", "", url)
                 self.url_var.set(url)
 
-        if not self.prompt_login_if_not_logged("analisar este conteúdo"):
+        if platform == "youtube" and not self.prompt_login_if_not_logged("analisar este conteúdo"):
             return
         self.info = None
         self.is_playlist = False
@@ -856,7 +879,9 @@ class App(ctk.CTk):
         is_audio = self.container_var.get().upper() == "MP3"
         item_type = "a playlist" if getattr(self, "is_playlist", False) else "o vídeo"
         action_desc = f"baixar {item_type} em MP3" if is_audio else f"baixar {item_type} em alta qualidade"
-        if not self.prompt_login_if_not_logged(action_desc):
+        webpage_url = self.info.get("webpage_url") or self.url_var.get().strip()
+        platform = detect_platform(webpage_url)
+        if platform == "youtube" and not self.prompt_login_if_not_logged(action_desc):
             return
         self._persist()
         self.progress.stop()
@@ -864,7 +889,6 @@ class App(ctk.CTk):
         self.progress.set(0)
         container = self.container_var.get().lower()
         playlist_title = self.info.get("title") or "Playlist"
-        webpage_url = self.info.get("webpage_url") or self.url_var.get().strip()
         is_pl = getattr(self, "is_playlist", False)
 
         if is_audio:
@@ -927,23 +951,23 @@ class App(ctk.CTk):
 
         steps = [
             (
-                "🔑 1. Conectar sua Conta do YouTube (Anti-Bloqueio)",
+                "🔑 1. Conectar sua Conta do YouTube (Para YouTube)",
                 "O YouTube impõe restrições contra robôs (erro HTTP 403 Forbidden) e bloqueia streams 4K/8K para quem não está logado.\n\n"
-                "• Clique no botão '🔑 Fazer Login no YouTube' e entre com sua conta na janela oficial do Google.\n"
-                "• Ao concluir, o badge verde '✔ Conta Conectada' confirma que você tem acesso total e velocidade máxima.",
+                "• Para baixar do YouTube, clique em '🔑 Fazer Login no YouTube' e entre com sua conta na janela oficial do Google.\n"
+                "• Para Instagram, Facebook e TikTok, não é obrigatório fazer login — basta colar o link público!",
                 "#10B981",
             ),
             (
-                "📋 2. Colar o Link do Vídeo ou Playlist",
-                "Copie a URL de qualquer vídeo ou playlist do YouTube (ex: https://www.youtube.com/watch?v=... ou https://www.youtube.com/playlist?list=...).\n\n"
+                "📋 2. Colar o Link (YouTube, Instagram, Facebook ou TikTok)",
+                "Copie a URL de qualquer vídeo, Reel, TikTok ou playlist do YouTube.\n\n"
                 "• No All Down, clique no botão '📋 Colar' ou use o atalho Ctrl + V.\n"
-                "• Se colar um vídeo que pertence a uma playlist, o app perguntará se você quer baixar a playlist inteira ou só aquele vídeo.",
+                "• Se colar um vídeo do YouTube que pertence a uma playlist, o app perguntará se você quer baixar a playlist inteira ou só aquele vídeo.",
                 "#3B82F6",
             ),
             (
                 "🔍 3. Analisar o Conteúdo",
                 "Clique em 'Analisar Vídeo' (ou pressione Enter no campo de link).\n\n"
-                "• O app consulta o YouTube e exibe thumbnail, título, canal, duração e todas as resoluções reais disponíveis.",
+                "• O app identifica automaticamente a plataforma e exibe thumbnail, título, autor, duração e resoluções reais disponíveis.",
                 "#8B5CF6",
             ),
             (
@@ -1049,24 +1073,32 @@ class App(ctk.CTk):
         self._set_state()
         threading.Thread(target=target, args=args, daemon=True).start()
 
-    def _base_opts(self, is_playlist: bool = False) -> dict:
-        extractor_args = {
-            "youtube": {
-                "player_client": ["mweb", "web_embedded", "web"]
-            }
-        }
-        if self.bgutil_server and os.path.isdir(self.bgutil_server):
-            extractor_args["youtubepot-bgutilscript"] = {
-                "server_home": [str(self.bgutil_server)]
-            }
-
+    def _base_opts(self, is_playlist: bool = False, platform: str = "youtube") -> dict:
         opts = {
             "quiet": True,
             "no_warnings": True,
             "noplaylist": not is_playlist,
             "noprogress": True,
-            "extractor_args": extractor_args,
         }
+        if platform == "youtube":
+            extractor_args = {
+                "youtube": {
+                    "player_client": ["mweb", "web_embedded", "web"]
+                }
+            }
+            if self.bgutil_server and os.path.isdir(self.bgutil_server):
+                extractor_args["youtubepot-bgutilscript"] = {
+                    "server_home": [str(self.bgutil_server)]
+                }
+            opts["extractor_args"] = extractor_args
+        else:
+            opts["http_headers"] = {
+                "User-Agent": (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/131.0.0.0 Safari/537.36"
+                )
+            }
         if self.ffmpeg:
             opts["ffmpeg_location"] = self.ffmpeg
         if self.js_runtimes:
@@ -1088,8 +1120,11 @@ class App(ctk.CTk):
 
     def _analyze_worker(self, url: str) -> None:
         try:
-            is_plist_url = ("playlist?list=" in url) or ("list=" in url and "watch" not in url) or ("list=" in url)
-            analyze_opts = self._base_opts(is_playlist=is_plist_url) | {"extract_flat": "in_playlist"}
+            platform = detect_platform(url)
+            is_plist_url = platform == "youtube" and (
+                ("playlist?list=" in url) or ("list=" in url and "watch" not in url) or ("list=" in url)
+            )
+            analyze_opts = self._base_opts(is_playlist=is_plist_url, platform=platform) | {"extract_flat": "in_playlist"}
             with yt_dlp.YoutubeDL(analyze_opts) as ydl:
                 info = ydl.extract_info(url, download=False)
 
@@ -1122,11 +1157,12 @@ class App(ctk.CTk):
                 except Exception:
                     pass
 
-            self.events.put(("info", (info, thumb_pil, is_playlist)))
+            self.events.put(("info", (info, thumb_pil, is_playlist, platform)))
         except Exception as exc:
             self.events.put(("error", clean_error(exc)))
 
     def _download_worker(self, url: str, height: int | None, container: str, folder: str, bitrate: str = "320", is_playlist: bool = False, playlist_title: str = "") -> None:
+        platform = detect_platform(url)
         target_folder = folder
         if is_playlist:
             clean_title = re.sub(r'[<>:"/\\|?*]', "_", playlist_title).strip() or "Playlist"
@@ -1150,7 +1186,7 @@ class App(ctk.CTk):
                     "add_metadata": True,
                 },
             ]
-            opts = self._base_opts(is_playlist=is_playlist) | {
+            opts = self._base_opts(is_playlist=is_playlist, platform=platform) | {
                 "format": fmt,
                 "outtmpl": outtmpl,
                 "postprocessors": postprocessors,
@@ -1173,10 +1209,12 @@ class App(ctk.CTk):
 
             if is_playlist:
                 outtmpl = os.path.join(target_folder, "%(playlist_index)02d - %(title)s [%(height)sp].%(ext)s")
+            elif height is None and platform != "youtube":
+                outtmpl = os.path.join(target_folder, "%(title)s.%(ext)s")
             else:
                 outtmpl = os.path.join(target_folder, "%(title)s [%(height)sp].%(ext)s")
 
-            opts = self._base_opts(is_playlist=is_playlist) | {
+            opts = self._base_opts(is_playlist=is_playlist, platform=platform) | {
                 "format": fmt,
                 "merge_output_format": container,
                 "outtmpl": outtmpl,
@@ -1253,7 +1291,8 @@ class App(ctk.CTk):
         self._set_state()
 
     def _on_info(self, payload: tuple) -> None:
-        info, thumb_pil, is_playlist = payload
+        info, thumb_pil, is_playlist, platform = payload
+        plat_name, plat_icon, plat_color = PLATFORM_INFO.get(platform, PLATFORM_INFO["other"])
         self.info = info
         self.is_playlist = is_playlist
 
@@ -1267,10 +1306,10 @@ class App(ctk.CTk):
             entries = list(info.get("entries") or [])
             self.playlist_count = len(entries)
             title = info.get("title") or "Playlist"
-            channel = info.get("uploader") or info.get("channel") or "YouTube"
+            channel = info.get("uploader") or info.get("channel") or plat_name
 
             self.video_title_lbl.configure(text=f"📋 {title}")
-            self.video_meta_lbl.configure(text=f"📺 {channel}   •   📋 {self.playlist_count} vídeos na playlist")
+            self.video_meta_lbl.configure(text=f"{plat_icon} {plat_name}  •  {channel}   •   📋 {self.playlist_count} vídeos na playlist")
             self.video_tier_badge.configure(text=f"  PLAYLIST ({self.playlist_count} VÍDEOS)  ", fg_color="#8B5CF6")
 
             self.quality_map = {
@@ -1284,11 +1323,11 @@ class App(ctk.CTk):
         else:
             self.playlist_count = 1
             title = info.get("title", "Sem título")
-            channel = info.get("uploader") or info.get("channel") or "Canal Desconhecido"
+            channel = info.get("uploader") or info.get("channel") or "Autor Desconhecido"
             duration = human_time(info.get("duration"))
 
             self.video_title_lbl.configure(text=title)
-            self.video_meta_lbl.configure(text=f"📺 {channel}   •   ⏱ Duração: {duration}")
+            self.video_meta_lbl.configure(text=f"{plat_icon} {plat_name}  •  {channel}   •   ⏱ Duração: {duration}")
 
             best: dict[int, tuple[float, int]] = {}
             for f in info.get("formats") or []:
@@ -1318,7 +1357,13 @@ class App(ctk.CTk):
                 self.video_tier_badge.configure(text="  DISPONÍVEL EM 4K ULTRA HD  ", fg_color="#D97706")
             else:
                 top_h = max(best.keys()) if best else 0
-                self.video_tier_badge.configure(text=f"  MÁXIMA RESOLUÇÃO: {top_h}p  ", fg_color="#2563EB")
+                if top_h > 0:
+                    self.video_tier_badge.configure(text=f"  MÁXIMA RESOLUÇÃO: {top_h}p  ", fg_color=plat_color)
+                else:
+                    self.video_tier_badge.configure(
+                        text=f"  {plat_icon} {plat_name.upper()} • MELHOR QUALIDADE  ",
+                        fg_color=plat_color,
+                    )
 
         if self.container_var.get().upper() == "MP3":
             self.q_label.configure(text="Qualidade do Áudio (Bitrate):")
