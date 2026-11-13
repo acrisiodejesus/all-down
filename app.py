@@ -1079,6 +1079,11 @@ class App(ctk.CTk):
             "no_warnings": True,
             "noplaylist": not is_playlist,
             "noprogress": True,
+            "retries": 10,
+            "fragment_retries": 10,
+            "continuedl": True,
+            "http_chunk_size": 10485760,
+            "socket_timeout": 30,
         }
         if platform == "youtube":
             extractor_args = {

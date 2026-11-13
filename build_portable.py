@@ -78,33 +78,43 @@ if (BASE_DIR / "bin" / "node.exe").is_file():
 
 bgutil_dest = internal_dir / "bgutil_provider" / "server"
 if (BASE_DIR / "bgutil_provider" / "server").is_dir():
-    shutil.copytree(
-        BASE_DIR / "bgutil_provider" / "server",
-        bgutil_dest,
-        dirs_exist_ok=True,
-        ignore=shutil.ignore_patterns(
-            ".git*", ".devcontainer", "src", "types", "scripts", "*.ts",
-            "*.tsbuildinfo", "eslint*", "prettier*", "Dockerfile", "deno*", "*.md"
-        ),
-    )
+    try:
+        shutil.copytree(
+            BASE_DIR / "bgutil_provider" / "server",
+            bgutil_dest,
+            dirs_exist_ok=True,
+            ignore=shutil.ignore_patterns(
+                ".git*", ".devcontainer", "src", "types", "scripts", "*.ts",
+                "*.tsbuildinfo", "eslint*", "prettier*", "Dockerfile", "deno*", "*.md"
+            ),
+        )
+    except shutil.Error as exc:
+        for src, dst, err in exc.args[0]:
+            print(f"AVISO: ignorado ao copiar {src}: {err}")
 
 if (BASE_DIR / "cookies.txt").is_file():
     shutil.copy2(BASE_DIR / "cookies.txt", PORTABLE_DIR / "cookies.txt")
 
 readme_content = """===============================================================
-  ALL DOWN — BAIXADOR DE VÍDEOS E PLAYLISTS EM 4K / MP3 (PORTÁTIL)
+  ALL DOWN — DOWNLOADER UNIVERSAL 4K / MP3 (PORTÁTIL)
 ===============================================================
+
+PLATAFORMAS SUPORTADAS:
+- YouTube (vídeos até 4K/8K, playlists e MP3)
+- Instagram (vídeos e Reels)
+- Facebook (vídeos e Reels)
+- TikTok (vídeos e áudios)
 
 COMO USAR:
 1. Dê um duplo clique em "AllDown.exe" para abrir o aplicativo.
-2. Cole o link do vídeo ou playlist do YouTube.
+2. Cole o link do vídeo, Reel ou playlist.
 3. Clique em "Analisar Vídeo".
-4. Escolha a resolução (até 4K/8K) ou selecione MP3 para baixar áudio.
+4. Escolha a resolução ou selecione MP3 para baixar apenas o áudio.
 5. Clique em "BAIXAR VÍDEO" (ou "BAIXAR PLAYLIST").
 
 DENTRO DO APLICATIVO:
 - Clique no botão "📖 Como Usar" no topo para o tutorial interativo completo.
-- Clique em "🔑 Fazer Login no YouTube" para conectar sua conta e evitar bloqueios.
+- Para links do YouTube, clique em "🔑 Fazer Login no YouTube" para evitar bloqueios.
 
 REQUISITOS:
 - Windows 10 ou 11 (64 bits).
