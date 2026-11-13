@@ -73,6 +73,7 @@ def get_base_dir() -> Path:
 def find_ffmpeg() -> str | None:
     base = get_base_dir()
     for candidate in [
+        base / "_internal" / "bin" / "ffmpeg.exe",
         base / "bin" / "ffmpeg.exe",
         base / "ffmpeg.exe",
         base / ".venv" / "Scripts" / "ffmpeg.exe",
@@ -105,6 +106,7 @@ def find_ffmpeg() -> str | None:
 def find_node() -> str | None:
     base = get_base_dir()
     for candidate in [
+        base / "_internal" / "bin" / "node.exe",
         base / "bin" / "node.exe",
         base / "node.exe",
         Path(r"C:\Program Files\nodejs\node.exe"),
@@ -118,6 +120,7 @@ def find_node() -> str | None:
 def find_bgutil_server() -> str | None:
     base = get_base_dir()
     candidates = [
+        base / "_internal" / "bgutil_provider" / "server",
         base / "bgutil_provider" / "server",
         Path.home() / "bgutil-ytdlp-pot-provider" / "server",
     ]
@@ -235,6 +238,10 @@ class App(ctk.CTk):
         self.base_dir = get_base_dir()
         icon_ico = self.base_dir / "assets" / "icon.ico"
         icon_png = self.base_dir / "assets" / "icon.png"
+        if not icon_ico.is_file():
+            icon_ico = self.base_dir / "_internal" / "assets" / "icon.ico"
+        if not icon_png.is_file():
+            icon_png = self.base_dir / "_internal" / "assets" / "icon.png"
         if icon_ico.is_file():
             try:
                 self.iconbitmap(str(icon_ico))

@@ -64,51 +64,51 @@ if not build_output.exists():
     sys.exit(1)
 
 safe_rmtree(PORTABLE_DIR)
-shutil.move(str(build_output), str(PORTABLE_DIR))
+shutil.copytree(build_output, PORTABLE_DIR, dirs_exist_ok=True)
+safe_rmtree(build_output)
 
-bin_dest = PORTABLE_DIR / "bin"
-bin_dest.mkdir(exist_ok=True)
+internal_dir = PORTABLE_DIR / "_internal"
+
+bin_dest = internal_dir / "bin"
+bin_dest.mkdir(parents=True, exist_ok=True)
 if (BASE_DIR / "bin" / "ffmpeg.exe").is_file():
     shutil.copy2(BASE_DIR / "bin" / "ffmpeg.exe", bin_dest / "ffmpeg.exe")
 if (BASE_DIR / "bin" / "node.exe").is_file():
     shutil.copy2(BASE_DIR / "bin" / "node.exe", bin_dest / "node.exe")
 
-bgutil_dest = PORTABLE_DIR / "bgutil_provider"
-if (BASE_DIR / "bgutil_provider").is_dir():
+bgutil_dest = internal_dir / "bgutil_provider" / "server"
+if (BASE_DIR / "bgutil_provider" / "server").is_dir():
     shutil.copytree(
-        BASE_DIR / "bgutil_provider",
+        BASE_DIR / "bgutil_provider" / "server",
         bgutil_dest,
         dirs_exist_ok=True,
-        ignore=shutil.ignore_patterns(".git", ".github", "*.pyc"),
+        ignore=shutil.ignore_patterns(
+            ".git*", ".devcontainer", "src", "types", "scripts", "*.ts",
+            "*.tsbuildinfo", "eslint*", "prettier*", "Dockerfile", "deno*", "*.md"
+        ),
     )
 
-assets_dest = PORTABLE_DIR / "assets"
-shutil.copytree(BASE_DIR / "assets", assets_dest, dirs_exist_ok=True)
 if (BASE_DIR / "cookies.txt").is_file():
     shutil.copy2(BASE_DIR / "cookies.txt", PORTABLE_DIR / "cookies.txt")
 
-if (BASE_DIR / "login.py").is_file():
-    shutil.copy2(BASE_DIR / "login.py", PORTABLE_DIR / "login.py")
-
 readme_content = """===============================================================
-  ALL DOWN — BAIXADOR DE VÍDEOS DO YOUTUBE EM 4K / 8K (PORTÁTIL)
+  ALL DOWN — BAIXADOR DE VÍDEOS E PLAYLISTS EM 4K / MP3 (PORTÁTIL)
 ===============================================================
 
 COMO USAR:
 1. Dê um duplo clique em "AllDown.exe" para abrir o aplicativo.
-2. Cole o link do vídeo do YouTube que deseja baixar.
+2. Cole o link do vídeo ou playlist do YouTube.
 3. Clique em "Analisar Vídeo".
-4. Selecione a resolução desejada (ex: 4K Ultra HD) e clique em "BAIXAR VÍDEO".
+4. Escolha a resolução (até 4K/8K) ou selecione MP3 para baixar áudio.
+5. Clique em "BAIXAR VÍDEO" (ou "BAIXAR PLAYLIST").
 
-LOGIN NO YOUTUBE:
-Se o YouTube solicitar confirmação de que você não é um robô:
-- Clique no botão "🔑 Fazer Login no YouTube" dentro do aplicativo.
-- Entre na sua conta normalmente na janela segura que abrir.
-- O aplicativo salvará seus cookies automaticamente para liberar todos os downloads.
+DENTRO DO APLICATIVO:
+- Clique no botão "📖 Como Usar" no topo para o tutorial interativo completo.
+- Clique em "🔑 Fazer Login no YouTube" para conectar sua conta e evitar bloqueios.
 
 REQUISITOS:
 - Windows 10 ou 11 (64 bits).
-- Nenhum software adicional precisa ser instalado.
+- Nenhuma instalação necessária (FFmpeg e Node.js já inclusos na pasta _internal).
 """
 (PORTABLE_DIR / "LEIA-ME.txt").write_text(readme_content, encoding="utf-8")
 
