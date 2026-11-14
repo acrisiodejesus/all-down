@@ -133,6 +133,8 @@ fun AllDownScreen(viewModel: DownloadViewModel) {
         ActivityResultContracts.RequestPermission()
     ) { }
 
+    var showStartupLoginPrompt by remember { mutableStateOf(!state.isLoggedIn) }
+
     LaunchedEffect(Unit) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
             val granted = ContextCompat.checkSelfPermission(
@@ -431,6 +433,38 @@ fun AllDownScreen(viewModel: DownloadViewModel) {
             confirmButton = {
                 TextButton(onClick = { viewModel.clearError() }) {
                     Text("OK", color = AccentRed)
+                }
+            }
+        )
+    }
+
+    if (showStartupLoginPrompt && !state.isLoggedIn) {
+        AlertDialog(
+            onDismissRequest = { showStartupLoginPrompt = false },
+            containerColor = CardColor,
+            title = { Text("Conectar conta do YouTube?", color = TextPrimary) },
+            text = {
+                Text(
+                    "Você ainda não fez login no YouTube.\n\n" +
+                        "Conectar sua conta evita o erro 403 (Forbidden), bloqueios anti-robô e libera resoluções máximas.\n\n" +
+                        "Deseja fazer login agora?",
+                    color = TextMuted,
+                    fontSize = 13.sp,
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showStartupLoginPrompt = false
+                        loginLauncher.launch(Intent(context, LoginActivity::class.java))
+                    }
+                ) {
+                    Text("Fazer Login", color = AccentRed)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showStartupLoginPrompt = false }) {
+                    Text("Agora não", color = TextMuted)
                 }
             }
         )

@@ -303,7 +303,7 @@ class App(ctk.CTk):
                 saved_cookies = NO_COOKIES
         self.cookies_var = ctk.StringVar(value=saved_cookies)
 
-        self.status_var = ctk.StringVar(value="Cole o link de um vídeo do YouTube e clique em Analisar.")
+        self.status_var = ctk.StringVar(value="Cole o link do YouTube, Instagram, Facebook ou TikTok e clique em Analisar.")
         self.progress_detail_var = ctk.StringVar(value="")
 
         self.thumb_image: ctk.CTkImage | None = None
