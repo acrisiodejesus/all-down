@@ -92,9 +92,6 @@ if (BASE_DIR / "bgutil_provider" / "server").is_dir():
         for src, dst, err in exc.args[0]:
             print(f"AVISO: ignorado ao copiar {src}: {err}")
 
-if (BASE_DIR / "cookies.txt").is_file():
-    shutil.copy2(BASE_DIR / "cookies.txt", PORTABLE_DIR / "cookies.txt")
-
 readme_content = """===============================================================
   ALL DOWN — DOWNLOADER UNIVERSAL 4K / MP3 (PORTÁTIL)
 ===============================================================
