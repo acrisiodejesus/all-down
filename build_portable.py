@@ -84,8 +84,8 @@ if (BASE_DIR / "bgutil_provider" / "server").is_dir():
             bgutil_dest,
             dirs_exist_ok=True,
             ignore=shutil.ignore_patterns(
-                ".git*", ".devcontainer", "src", "types", "scripts", "*.ts",
-                "*.tsbuildinfo", "eslint*", "prettier*", "Dockerfile", "deno*", "*.md"
+                ".git*", ".devcontainer", "node_modules_old", "types", "*.ts",
+                "*.tsbuildinfo", "eslint*", "prettier*", "Dockerfile", "deno*"
             ),
         )
     except shutil.Error as exc:
