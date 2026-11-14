@@ -176,9 +176,66 @@ def human_time(seconds: float | None) -> str:
     return f"{h}:{m:02d}:{s:02d}" if h else f"{m}:{s:02d}"
 
 
+ERROR_MESSAGES = [
+    (
+        ("getaddrinfo failed", "11001", "nameresolutionerror", "failed to resolve", "network is unreachable", "temporary failure in name resolution"),
+        "Sem conexão com a internet ou falha de DNS ao acessar o servidor.\n\nVerifique sua conexão, VPN ou firewall e tente novamente.",
+    ),
+    (
+        ("timed out", "timeouterror", "incompleteread", "bytes read", "connectionreseterror", "connectionabortederror", "remotedisconnected", "connection refused", "sslerror"),
+        "A conexão com o servidor caiu ou expirou durante a transferência.\n\nVerifique se sua internet está estável e tente novamente.",
+    ),
+    (
+        ("403", "forbidden"),
+        "Acesso bloqueado pelo servidor (Erro 403 Forbidden).\n\nPara o YouTube, conecte sua conta pelo botão '🔑 Fazer Login no YouTube' e tente novamente.",
+    ),
+    (
+        ("sign in to confirm", "not a bot", "login required", "401", "unauthorized", "login_required"),
+        "A plataforma solicitou login ou a sua sessão expirou.\n\nClique em '🔑 Fazer Login no YouTube' para renovar seus cookies (ou selecione um navegador conectado para links privados).",
+    ),
+    (
+        ("private video", "video is private", "members-only", "join this channel", "confirm your age", "age-restricted"),
+        "Este conteúdo é privado, exclusivo para membros ou possui restrição de idade.\n\nConecte uma conta que tenha permissão para assistir ao vídeo.",
+    ),
+    (
+        ("unsupported url", "not a valid url", "video unavailable", "been removed", "404", "not found", "does not exist", "no longer available"),
+        "Vídeo indisponível, removido ou link inválido.\n\nConfira se o link está completo e se o vídeo continua acessível no navegador.",
+    ),
+    (
+        ("your country", "geo-restricted", "blocked it in your country"),
+        "Este vídeo não está disponível para a sua região/país.",
+    ),
+    (
+        ("429", "too many requests", "rate limit"),
+        "Muitas tentativas seguidas (Erro 429).\n\nAguarde alguns minutos e tente novamente.",
+    ),
+    (
+        ("no space left", "disk full"),
+        "Espaço insuficiente no disco para salvar o arquivo.\n\nLibere espaço ou escolha outra pasta de destino.",
+    ),
+    (
+        ("permission denied", "winerror 5", "access is denied"),
+        "Sem permissão para gravar na pasta de destino.\n\nEscolha outra pasta (como Downloads) e tente novamente.",
+    ),
+    (
+        ("requested format is not available", "no video formats found"),
+        "A qualidade selecionada não está disponível para este vídeo.\n\nTente selecionar 'Melhor disponível (Auto)'.",
+    ),
+    (
+        ("ffmpeg", "postprocessing"),
+        "Erro ao processar ou converter o arquivo com o FFmpeg.\n\nTente outro formato (MP4/MKV) ou verifique se o arquivo não está corrompido.",
+    ),
+]
+
+
 def clean_error(exc: Exception) -> str:
     msg = ANSI_RE.sub("", str(exc)).strip()
-    return msg.removeprefix("ERROR:").strip() or exc.__class__.__name__
+    raw = msg.removeprefix("ERROR:").strip() or exc.__class__.__name__
+    lower = raw.lower()
+    for patterns, friendly in ERROR_MESSAGES:
+        if any(p in lower for p in patterns):
+            return f"{friendly}\n\nDetalhe técnico: {raw[:220]}"
+    return f"Ocorreu um erro inesperado ao processar o vídeo.\n\nDetalhe técnico: {raw[:260]}"
 
 
 def load_settings() -> dict:

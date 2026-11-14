@@ -228,7 +228,7 @@ class DownloadViewModel(application: Application) : AndroidViewModel(application
                         isBusy = false,
                         isAnalyzing = false,
                         statusText = "Falha na análise",
-                        errorMessage = e.localizedMessage ?: "Não foi possível analisar este link",
+                        errorMessage = friendlyError(e, "Não foi possível analisar este link"),
                     )
                 }
             }
@@ -325,11 +325,36 @@ class DownloadViewModel(application: Application) : AndroidViewModel(application
                     it.copy(
                         isBusy = false,
                         statusText = "Erro no download",
-                        errorMessage = e.localizedMessage ?: "Falha ao baixar",
+                        errorMessage = friendlyError(e, "Falha ao baixar"),
                     )
                 }
             }
         }
+    }
+
+    private fun friendlyError(e: Exception, fallback: String): String {
+        val raw = (e.localizedMessage ?: fallback).trim()
+        val lower = raw.lowercase()
+        val friendly = when {
+            listOf("unable to resolve host", "no address associated", "getaddrinfo", "network is unreachable").any { it in lower } ->
+                "Sem conexão com a internet ou falha de DNS. Verifique seu Wi-Fi/dados móveis e tente novamente."
+            listOf("timed out", "incompleteread", "bytes read", "connection reset", "ssl").any { it in lower } ->
+                "A conexão oscilou ou expirou durante a transferência. Tente novamente."
+            "403" in lower || "forbidden" in lower ->
+                "Acesso bloqueado (403 Forbidden). Faça login no YouTube pelo botão 'Login YT' e tente novamente."
+            listOf("sign in", "not a bot", "login required", "401").any { it in lower } ->
+                "A plataforma solicitou login ou sua sessão expirou. Toque em 'Login YT' para reconectar."
+            listOf("private video", "video is private", "members-only", "confirm your age").any { it in lower } ->
+                "Este vídeo é privado, exclusivo para membros ou possui restrição de idade."
+            listOf("unsupported url", "video unavailable", "404", "not found", "been removed").any { it in lower } ->
+                "Vídeo indisponível, removido ou link inválido."
+            "429" in lower || "too many requests" in lower ->
+                "Muitas tentativas seguidas (429). Aguarde alguns minutos e tente novamente."
+            "no space" in lower ->
+                "Espaço de armazenamento insuficiente no aparelho."
+            else -> fallback
+        }
+        return "$friendly\n\nDetalhe: ${raw.take(200)}"
     }
 
     private fun formatDuration(seconds: Int): String {
